@@ -62,7 +62,7 @@ export default function EfficientFrontier({ stockItems }: EfficientFrontierProps
     setPoints([]);
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/api/optimize/frontier", {
+      const res = await axios.post("http://127.0.0.1:5001/api/optimize/frontier", {
         codes,
         start,
         end,
