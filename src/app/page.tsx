@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 
 import DataCollect from "@/components/DataCollect";
 import ModelSelect from "@/components/ModelSelect";
-import Frontier from "@/components/Frontier";
 import EfficientFrontier from "@/components/EfficientFrontier";
 import AiAnalysis from "@/components/AiAnalysis";
 
@@ -22,7 +21,7 @@ export default function Page() {
   const [stockItems, setStockItems] = useState([]);
 
   // 🔥 선택된 모델 저장
-  const [selectedModel, setSelectedModel] = useState(null);
+  const [selectedModel, setSelectedModel] = useState<any | null>(null);
 
   // 공통 스타일
   const navStyle = {
@@ -125,6 +124,7 @@ export default function Page() {
         {selectedTab === "model" && (
           <ModelSelect
             stockItems={stockItems}
+            selectedModel={selectedModel}
             onChange={(model) => {
               console.log("선택된 모델:", model);
               setSelectedModel(model);
@@ -135,12 +135,11 @@ export default function Page() {
         {/* 📌 효율적 프론티어 & Frontier */}
         {selectedTab === "efficient" && (
           <>
-            <Frontier
-              stockItems={stockItems}
-              selectedModel={selectedModel}
-            />
             <div style={{ marginTop: "3rem" }}>
-              <EfficientFrontier stockItems={stockItems} />
+              <EfficientFrontier
+                stockItems={stockItems}
+                selectedModel={selectedModel}
+              />
             </div>
           </>
         )}

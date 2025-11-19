@@ -17,7 +17,7 @@ interface StockItem {
 }
 
 const API_BASE =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000";
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5001";
 
 // 백엔드 라우트에 맞춘 엔드포인트
 
@@ -462,56 +462,63 @@ export default function DataCollect({ stockItems, setStockItems }: any) {
                             </tr>
                         </thead>
                         <tbody>
-                            {stockItems.map((item) => (
-                                <tr
-                                    key={item.code}
-                                    style={{
-                                        borderBottom: "1px solid #f1f5f9",
-                                    }}
-                                >
-                                    <td style={{ padding: "0.5rem" }}>
-                                        {item.code}
-                                    </td>
-                                    <td style={{ padding: "0.5rem" }}>
-                                        {item.name}
-                                    </td>
-                                    <td style={{ padding: "0.5rem" }}>
-                                        {item.price}
-                                    </td>
-                                    <td
+                            {stockItems.map((item) => {
+                                return (
+                                    <tr
+                                        key={item.code}
                                         style={{
-                                            padding: "0.5rem",
-                                            color: getChangeColor(item.change),
-                                            fontWeight: 600,
+                                            borderBottom: "1px solid #f1f5f9",
                                         }}
                                     >
-                                        {(() => {
-                                            const num = parseFloat(item.change); // "5.45%" → 5.45, "-3.2%" → -3.2
-                                            const sign = num > 0 ? "+" : num < 0 ? "-" : "";
-                                            return sign + Math.abs(num) + "%";
-                                        })()}
-                                    </td>
-                                    <td style={{ padding: "0.5rem" }}>
-                                        <button
-                                            type="button"
+                                        <td style={{ padding: "0.5rem" }}>
+                                            {item.code}
+                                        </td>
+                                        <td style={{ padding: "0.5rem" }}>
+                                            {item.name}
+                                        </td>
+                                        <td style={{ padding: "0.5rem" }}>
+                                            {item.price}
+                                        </td>
+                                        
+                                        <td
                                             style={{
-                                                background: "transparent",
-                                                border: "none",
-                                                color: "black",
-                                                fontWeight: "bold",
-                                                fontSize: "1.1rem",
-                                                cursor: "pointer",
+                                                padding: "0.5rem",
+                                                color: getChangeColor(item.change),
+                                                fontWeight: 600,
                                             }}
-                                            aria-label={`종목 ${item.name} 삭제`}
-                                            onClick={() =>
-                                                handleDelete(item.code)
-                                            }
                                         >
-                                            ×
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                            {(() => {
+                                                const cleaned = item.change.replace(/[^\d.-]/g, "");
+                                                // 숫자, '.', '-', 이외 모두 제거
+
+                                                const num = parseFloat(cleaned);
+
+                                                const sign = num > 0 ? "+" : num < 0 ? "-" : "";
+                                                return sign + Math.abs(num).toFixed(2) + "%";
+                                            })()}
+                                        </td>
+                                        <td style={{ padding: "0.5rem" }}>
+                                            <button
+                                                type="button"
+                                                style={{
+                                                    background: "transparent",
+                                                    border: "none",
+                                                    color: "black",
+                                                    fontWeight: "bold",
+                                                    fontSize: "1.1rem",
+                                                    cursor: "pointer",
+                                                }}
+                                                aria-label={`종목 ${item.name} 삭제`}
+                                                onClick={() =>
+                                                    handleDelete(item.code)
+                                                }
+                                            >
+                                                ×
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
                             {stockItems.length === 0 && (
                                 <tr>
                                     <td

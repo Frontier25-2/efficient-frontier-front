@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo } from "react";
 import {
   Chart as ChartJS,
@@ -33,6 +32,7 @@ const markerColors: Record<string, string> = {
 
 interface EfficientFrontierProps {
   stockItems: any[];
+  selectedModel?: any;
 }
 
 interface FrontierPoint {
@@ -49,7 +49,7 @@ interface MarkerPoint {
   weights: number[];
 }
 
-export default function EfficientFrontier({ stockItems }: EfficientFrontierProps) {
+export default function EfficientFrontier({ stockItems, selectedModel }: EfficientFrontierProps) {
   const [loading, setLoading] = useState(false);
   const [points, setPoints] = useState<FrontierPoint[]>([]);
   const [markers, setMarkers] = useState<MarkerPoint[]>([]);
@@ -152,7 +152,7 @@ export default function EfficientFrontier({ stockItems }: EfficientFrontierProps
     setMarkers([]);
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/api/frontier", {
+      const res = await axios.post("http://127.0.0.1:5001/api/frontier", {
         codes,
         start,
         end,
@@ -310,7 +310,7 @@ export default function EfficientFrontier({ stockItems }: EfficientFrontierProps
           marginBottom: "0.5rem",
         }}
       >
-        📈 효율적 프론티어 곡선 (백엔드 실시간 계산)
+        📈 효율적 프론티어 곡선 (실시간 계산)
       </h3>
       <p
         style={{
@@ -422,6 +422,30 @@ export default function EfficientFrontier({ stockItems }: EfficientFrontierProps
         </div>
       )}
 
+      {/* 🔍 슬라이더 기준 추천 포트폴리오 요약 */}
+      {selectedPoint && (
+        <div style={{ marginTop: "1.25rem", marginBottom: "2rem" }}>
+          <h4
+            style={{
+              fontWeight: 600,
+              fontSize: "1rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            🔍 현재 리스크 허용 수준 기준 추천 포트폴리오
+          </h4>
+          <p style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
+            리스크: {(selectedPoint.risk * 100).toFixed(2)}% / 기대수익률:{" "}
+            {(selectedPoint.expectedReturn * 100).toFixed(2)}%
+          </p>
+          {selectedPoint.weights.length > 0 && (
+            <p style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+              비중: {selectedPoint.weights.map((w) => w.toFixed(3)).join(", ")}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* 프론티어 표 */}
       {points.length > 0 && (
         <table
@@ -455,29 +479,6 @@ export default function EfficientFrontier({ stockItems }: EfficientFrontierProps
         </table>
       )}
 
-      {/* 🔍 슬라이더 기준 추천 포트폴리오 요약 */}
-      {selectedPoint && (
-        <div style={{ marginTop: "1.25rem" }}>
-          <h4
-            style={{
-              fontWeight: 600,
-              fontSize: "1rem",
-              marginBottom: "0.5rem",
-            }}
-          >
-            🔍 현재 리스크 허용 수준 기준 추천 포트폴리오
-          </h4>
-          <p style={{ fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-            리스크: {(selectedPoint.risk * 100).toFixed(2)}% / 기대수익률:{" "}
-            {(selectedPoint.expectedReturn * 100).toFixed(2)}%
-          </p>
-          {selectedPoint.weights.length > 0 && (
-            <p style={{ fontSize: "0.85rem", color: "#4b5563" }}>
-              비중: {selectedPoint.weights.map((w) => w.toFixed(3)).join(", ")}
-            </p>
-          )}
-        </div>
-      )}
 
       {!loading && !error && points.length === 0 && (
         <p

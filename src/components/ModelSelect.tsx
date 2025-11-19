@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5001";
 
-const portfolios = [
+type Portfolio = {
+  id: string;
+  title: string;
+  subtitle: string;
+  api: string;
+  icon: string;
+  color: string;
+};
+
+const portfolios: Portfolio[] = [
   {
     id: "minVar",
     title: "최소 분산 포트폴리오",
@@ -40,19 +49,38 @@ const portfolios = [
   },
 ];
 
-export default function ModelSelect({ stockItems }: any) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+interface ModelSelectProps {
+  stockItems: any[];
+  selectedModel?: Portfolio | null;
+  onChange?: (model: Portfolio | null) => void;
+}
+
+export default function ModelSelect({
+  stockItems,
+  selectedModel,
+  onChange,
+}: ModelSelectProps) {
+  // 🔥 부모가 준 selectedModel을 기준으로 초기 상태 설정
+  const [selectedId, setSelectedId] = useState<string | null>(
+    selectedModel?.id ?? null
+  );
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  const selectedModel = portfolios.find((p) => p.id === selectedId);
+  // 부모의 selectedModel이 바뀌면, 내부 selectedId도 동기화
+  useEffect(() => {
+    setSelectedId(selectedModel?.id ?? null);
+  }, [selectedModel]);
+
+  const activeModel =
+    portfolios.find((p) => p.id === selectedId) ?? null;
 
   const codes = stockItems?.map((s: any) => s.code);
   const start = stockItems?.[0]?.start;
   const end = stockItems?.[0]?.end;
 
   const handleOptimize = async () => {
-    if (!selectedModel) return;
+    if (!activeModel) return;
 
     if (!codes || codes.length < 5) {
       alert("최소 5개 종목이 필요합니다.");
@@ -63,7 +91,7 @@ export default function ModelSelect({ stockItems }: any) {
     setResult(null);
 
     try {
-      const res = await fetch(`${API_BASE}${selectedModel.api}`, {
+      const res = await fetch(`${API_BASE}${activeModel.api}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codes, start, end }),
@@ -121,7 +149,11 @@ export default function ModelSelect({ stockItems }: any) {
           return (
             <button
               key={p.id}
-              onClick={() => setSelectedId(p.id)}
+               onClick={() => {
+                setSelectedId(p.id);
+                // 🔥 여기서 부모에게 선택된 모델 전달
+                if (onChange) onChange(p);
+              }}
               style={{
                 flex: "1 1 45%",
                 borderRadius: 12,
@@ -143,16 +175,16 @@ export default function ModelSelect({ stockItems }: any) {
       <div style={{ marginTop: 24, textAlign: "center" }}>
         <button
           onClick={handleOptimize}
-          disabled={!selectedId || loading}
+          disabled={!activeModel || loading}
           style={{
             padding: "12px 24px",
             fontSize: 16,
             fontWeight: 600,
             color: "white",
-            backgroundColor: selectedId ? "#b91c1c" : "#999",
+            backgroundColor: activeModel ? "#b91c1c" : "#999",
             borderRadius: 8,
             border: "none",
-            cursor: selectedId ? "pointer" : "not-allowed",
+            cursor: activeModel ? "pointer" : "not-allowed",
           }}
         >
           {loading ? "계산 중..." : "선택한 모델로 포트폴리오 구성하기"}
